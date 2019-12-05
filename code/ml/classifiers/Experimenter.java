@@ -45,58 +45,5 @@ public class Experimenter {
 		
 		return (double) correct / total;
 	}
-	
-	public static void experimentThree() {
-		DataSet data = new DataSet("data/titanic-train.csv", DataSet.CSVFILE);
-		CrossValidationSet cvs = new CrossValidationSet(data, 10);
-		double[][] accuracies = new double[10][10];
-		
-		for (int numHiddenNodes = 1; numHiddenNodes <= 10; numHiddenNodes++) {
-			TwoLayerNN net = new TwoLayerNN(numHiddenNodes);
-			for (int split = 0; split < 10; split++) {
-				DataSetSplit splitData = cvs.getValidationSet(split);
-				net.train(splitData.getTrain());
-				// add to accuracy list
-				accuracies[numHiddenNodes-1][split] =  net.getAccuracy(splitData.getTest());
-			}
-		}
-		
-		for (int nodes = 0; nodes < 10; nodes++) {
-			System.out.println("Accuracies With " + (nodes+1) + " Hidden Nodes");
-			for (double accuracy : accuracies[nodes]) {
-				System.out.println(accuracy);
-			}
-			System.out.println();
-		}
-	}
-	
-	public static void experimentFour() {
-		DataSet data = new DataSet("data/titanic-train.csv", DataSet.CSVFILE);
-		CrossValidationSet cvs = new CrossValidationSet(data, 10);
-		Map<Double, double[][]> etaAccuracy = new HashMap<>();
 
-		for (double eta = 0.1; eta <= 1; eta += 0.1) {
-			double[][] accuracies = new double[10][10];
-			System.out.println("Eta: " + eta);
-			
-			for (int numHiddenNodes = 1; numHiddenNodes <= 10; numHiddenNodes++) {
-				TwoLayerNN net = new TwoLayerNN(numHiddenNodes);
-				for (int split = 0; split < 10; split++) {
-					DataSetSplit splitData = cvs.getValidationSet(split);
-					net.train(splitData.getTrain());
-					net.setEta(eta);
-					// add to accuracy list
-					accuracies[numHiddenNodes-1][split] =  net.getAccuracy(splitData.getTest());
-				}
-			}
-			
-			for (int nodes = 0; nodes < 10; nodes++) {
-				System.out.println("Accuracies With " + (nodes+1) + " Hidden Nodes");
-				for (double accuracy : accuracies[nodes]) {
-					System.out.println(accuracy);
-				}
-				System.out.println();
-			}		
-		}
-	}
 }
