@@ -39,8 +39,7 @@ public class BaggingClassifier implements Classifier {
 		classifiers = new Classifier[n];
 		splits = new DataSet[n];
 		
-		constructor = new String(new char[n]).replace("\0", "p ");
-		constructor = constructor.substring(0, constructor.length()-1);
+		constructor = n + "p";
 		
 		rand = new Random();
 		
@@ -97,16 +96,25 @@ public class BaggingClassifier implements Classifier {
 		classifiers = new Classifier[n];
 		int i = 0;
 		
+		// parse each batch of constructors separately
 		String[] batch = constructor.split(" ");
 		for (String b : batch) {
 			
-			int iterations = 1;
-			if (Character.isDigit(b.charAt(0))) {
-				iterations = b.charAt(0) - '0';
-				b.substring(1);
+			// parse out the leading number
+			int numEndIndex = 0;
+			while(Character.isDigit(b.charAt(numEndIndex))) {
+				numEndIndex++;
 			}
 			
+			// if there was none, that means we only need one iteration
+			int iterations = numEndIndex == 0 ? 1 : Integer.valueOf(b.substring(0, numEndIndex));
+			b = b.substring(numEndIndex);
+			System.out.println(b);
+			System.out.println(iterations);
+			
+
 			char classifierType = b.charAt(0);
+
 			for (int iter = 0; iter<iterations; iter++) {
 				if (i >= n) break;
 				
