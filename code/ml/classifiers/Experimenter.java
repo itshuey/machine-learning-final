@@ -9,6 +9,12 @@ public class Experimenter {
 	
 	public static void main(String[] args) {
 		testData();
+		testBagger();
+	}
+	
+	public static void testBagger() {
+		BaggingClassifier bag = new BaggingClassifier();
+		bag.printConstructor();
 	}
 	
 	public static void testData() {

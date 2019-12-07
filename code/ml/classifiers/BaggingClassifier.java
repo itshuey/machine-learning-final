@@ -14,7 +14,13 @@ public class BaggingClassifier implements Classifier {
 	private Classifier[] classifiers;
 	private DataSet[] splits;
 	
+	private String constructor;
+	// Example: 3p3 2t3
+	
 	private static Random rand;
+	
+	public static final char PERCEPTRON = 'p';
+	public static final char DECISION_TREE = 't';
 	
 	/**
 	 * Default constructor with n=3
@@ -32,7 +38,21 @@ public class BaggingClassifier implements Classifier {
 		n = numClassifiers;
 		classifiers = new Classifier[n];
 		splits = new DataSet[n];
+		
+		constructor = new String(new char[n]).replace("\0", "p ");
+		constructor = constructor.substring(0, constructor.length()-1);
+		
 		rand = new Random();
+		
+	}
+	
+	public void setConstructor(String s) {
+		constructor = s;
+	}
+	
+	
+	public void printConstructor() {
+		System.out.println(constructor);
 	}
 	
 	/**
@@ -43,7 +63,8 @@ public class BaggingClassifier implements Classifier {
 	 */
 	@Override
 	public void train(DataSet data) {
-		setup(data);
+		setupData(data);
+		setupClassifiers();
 		for (int i = 0; i < n; i++) {
 			classifiers[i].train(splits[i]);
 		}
@@ -52,10 +73,17 @@ public class BaggingClassifier implements Classifier {
 	/**
 	 * 
 	 */
-	public void setup(DataSet data) {
+	public void setupData(DataSet data) {
 		for (int classifier = 0; classifier < n; classifier++) {
-			splits[classifier] = getSampledData(data);
-			classifiers[classifier] = getNewClassifier();
+			
+			DataSet sample = new DataSet(data.getFeatureMap());
+			List<Example> currentData = data.getData();
+			int size = currentData.size();
+			
+			for (int i = 0; i < size; i++) 
+				sample.addData(currentData.get(rand.nextInt(size)));
+			
+			splits[classifier] = sample;
 		}
 	}
 	
@@ -64,29 +92,40 @@ public class BaggingClassifier implements Classifier {
 	 * @param data
 	 * @return
 	 */
-	public static DataSet getSampledData(DataSet data) {
-		DataSet sample = new DataSet(data.getFeatureMap());
-		List<Example> currentData = data.getData();
-		int size = currentData.size();
+	public void setupClassifiers() {
 		
-		for (int i = 0; i < size; i++) 
-			sample.addData(currentData.get(rand.nextInt(size)));
+		classifiers = new Classifier[n];
+		int i = 0;
 		
-		return sample;
-	}
-	
-	/**
-	 * 
-	 * @param data
-	 * @return
-	 */
-	public static Classifier getNewClassifier() {
-	
-//		DecisionTreeClassifier newTree = new DecisionTreeClassifier();
-//		newTree.setDepthLimit(3);
-//		return newTree;
-		
-		return new PerceptronClassifier();
+		String[] batch = constructor.split(" ");
+		for (String b : batch) {
+			
+			int iterations = 1;
+			if (Character.isDigit(b.charAt(0))) {
+				iterations = b.charAt(0) - '0';
+				b.substring(1);
+			}
+			
+			char classifierType = b.charAt(0);
+			for (int iter = 0; iter<iterations; iter++) {
+				if (i >= n) break;
+				
+				if (classifierType == PERCEPTRON) {
+					PerceptronClassifier c = new PerceptronClassifier();
+					// tune hyperparameters if they exist
+					if (b.length() > 2) c.setIterations(Integer.valueOf(b.substring(1)));
+					classifiers[i] = c; i++;
+					
+				} else if (classifierType == DECISION_TREE) {
+					
+					DecisionTreeClassifier c = new DecisionTreeClassifier();
+					// tune hyperparameters if they exist
+					if (b.length() > 2) c.setDepthLimit(Integer.valueOf(b.substring(1)));
+					classifiers[i] = c; i++;
+					
+				}
+			}
+		}
 	}
 
 	/**
@@ -145,6 +184,5 @@ public class BaggingClassifier implements Classifier {
 		n = numClassifiers;
 		classifiers = new Classifier[n];
 		splits = new DataSet[n];
-		
 	}
 }
