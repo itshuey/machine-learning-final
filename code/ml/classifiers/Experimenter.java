@@ -14,7 +14,7 @@ public class Experimenter {
 	
 	public static void testBagger() {
 		BaggingClassifier bag = new BaggingClassifier();
-		bag.printConstructor();
+		bag.printClassifierConstructor();
 	}
 	
 	public static void testData() {
