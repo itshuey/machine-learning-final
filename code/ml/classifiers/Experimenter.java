@@ -8,8 +8,8 @@ import ml.data.*;
 public class Experimenter {
 	
 	public static void main(String[] args) {
+//		testBagger();
 		testData();
-		testBagger();
 	}
 	
 	public static void testBagger() {
@@ -24,13 +24,17 @@ public class Experimenter {
 		PerceptronClassifier c = new PerceptronClassifier();
 		c.train(splitData.getTrain());
 		System.out.println(getAccuracy(c,splitData.getTest()));
-		System.out.println(c);
+//		System.out.println(c);
+		
+		TwoLayerNN net = new TwoLayerNN(3);
+		net.train(splitData.getTrain());
+		System.out.println(getAccuracy(net,splitData.getTest()));
 		
 		BaggingClassifier bag = new BaggingClassifier(10);
 		bag.train(splitData.getTrain());
 		System.out.println(getAccuracy(bag,splitData.getTest()));
 		
-		bag.printClassifiers();
+//		bag.printClassifiers();
 	}
 	
 	

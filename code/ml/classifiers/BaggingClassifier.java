@@ -8,14 +8,26 @@ import java.util.Random;
 import ml.data.DataSet;
 import ml.data.Example;
 
+/**
+ * BaggingClassifier 
+ * 
+ * @author huey
+ */
 public class BaggingClassifier implements Classifier {
 	private int n;
 	private Classifier[] classifiers;
 	private DataSet[] splits;
 	
 	private String constructor;
-	// Example: 3p3 2t3
-	
+	// Separate the instructions by a space
+	// Each instruction is of form $n$c$h
+	// 	where $n = number of classifiers (optional)
+	//		  $c = character code of classifier
+	//		  $h = hyperparameter to tune (optional)
+	//
+	// Example: 3p t
+	// Example: p3 4t3
+
 	private static Random rand;
 	
 	public static final char PERCEPTRON = 'p';
@@ -38,10 +50,9 @@ public class BaggingClassifier implements Classifier {
 		classifiers = new Classifier[n];
 		splits = new DataSet[n];
 		
-		// Defaults to create n perceptrons
+		// Default: create n perceptrons
 		constructor = n + "p";
 		rand = new Random();
-		
 	}
 	
 	/**
