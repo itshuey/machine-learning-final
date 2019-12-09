@@ -9,7 +9,8 @@ public class Experimenter {
 	
 	public static void main(String[] args) {
 //		testBagger();
-		testData();
+//		testPerceptronBagging();
+		testTreeBagging();
 	}
 	
 	public static void testBagger() {
@@ -17,7 +18,7 @@ public class Experimenter {
 		bag.printClassifierConstructor();
 	}
 	
-	public static void testData() {
+	public static void testPerceptronBagging() {
 		DataSet data = new DataSet("data/abalone.data");
 		
 		DataSetSplit splitData = data.split(0.8);
@@ -31,6 +32,24 @@ public class Experimenter {
 		System.out.println(getAccuracy(net,splitData.getTest()));
 		
 		BaggingClassifier bag = new BaggingClassifier(10);
+		bag.train(splitData.getTrain());
+		System.out.println(getAccuracy(bag,splitData.getTest()));
+		
+//		bag.printClassifiers();
+	}
+	
+	
+	public static void testTreeBagging() {
+		DataSet data = new DataSet("data/abalone.data");
+		
+		DataSetSplit splitData = data.split(0.8);
+		DecisionTreeClassifier tree = new DecisionTreeClassifier();
+		tree.train(splitData.getTrain());
+		System.out.println(getAccuracy(tree,splitData.getTest()));
+//		System.out.println(tree);
+		
+		BaggingClassifier bag = new BaggingClassifier(10);
+		bag.setClassifierConstructor("10t5");
 		bag.train(splitData.getTrain());
 		System.out.println(getAccuracy(bag,splitData.getTest()));
 		

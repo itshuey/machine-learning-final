@@ -115,16 +115,15 @@ public class BaggingClassifier implements Classifier {
 					
 					PerceptronClassifier c = new PerceptronClassifier();
 					// tune hyperparameters if they exist
-					if (b.length() > 2) c.setIterations(Integer.valueOf(b.substring(1)));
+					if (b.length() >= 2) c.setIterations(Integer.valueOf(b.substring(1)));
 					classifiers[i] = c; i++;
 					
 				} else if (classifierType == DECISION_TREE) {
 					
 					DecisionTreeClassifier c = new DecisionTreeClassifier();
 					// tune hyperparameters if they exist
-					if (b.length() > 2) c.setDepthLimit(Integer.valueOf(b.substring(1)));
+					if (b.length() >= 2) c.setDepthLimit(Integer.valueOf(b.substring(1)));
 					classifiers[i] = c; i++;
-					
 				}
 			}
 		}

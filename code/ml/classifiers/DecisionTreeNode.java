@@ -9,12 +9,6 @@ import java.util.Map;
  *
  */
 public class DecisionTreeNode {
-	// values associated with going down the left or right branch of the tree,
-	// e.g. if a feature has value 0.0, then you should be traversing down the
-	// left branch.  Try to use these constants since it will make your code
-	// more readable.
-	public static double LEFT_BRANCH = 0.0;
-	//public static double RIGHT_BRANCH = 1.0;
 	
 	// whether or not this is a leaf
 	private boolean leaf;
@@ -24,7 +18,8 @@ public class DecisionTreeNode {
 	private double confidence = 0.0;
 	
 	// only applicable if it's an internal node
-	private int featureIndex;  // the index of the feature we're checking
+	private int featureIndex;	// the index of the feature we're checking
+	private double threshold;	// the threshold value we split on
 	
 	private DecisionTreeNode left;
 	private DecisionTreeNode right;
@@ -48,6 +43,17 @@ public class DecisionTreeNode {
 	public DecisionTreeNode(int featureIndex){
 		leaf = false;
 		this.featureIndex = featureIndex;
+	}
+	
+	/**
+	 * Create an internal node that splits on featureIndex with input threshold
+	 * 
+	 * @param featureIndex
+	 */
+	public DecisionTreeNode(int featureIndex, double threshold){
+		leaf = false;
+		this.featureIndex = featureIndex;
+		this.threshold = threshold;
 	}
 
 	/**
@@ -120,6 +126,16 @@ public class DecisionTreeNode {
 	}
 	
 	/**
+	 * Get the threshold
+	 * 
+	 * @return
+	 */
+	public double getThreshold(){
+		return threshold;
+	}
+	
+	
+	/**
 	 * Get the feature index that this internal node splits on
 	 * 
 	 * @return
@@ -160,14 +176,14 @@ public class DecisionTreeNode {
 	 */
 	private String treeStringHelper(String spaces, Map<Integer,String> headers){
 		if( leaf ){
-			return "predict=" + Double.toString(prediction);
+			return "predict: " + Double.toString(prediction);
 		}else{
 			String featureString;
 			
 			if( headers == null ){
 				featureString = Integer.toString(featureIndex);
 			}else{
-				featureString = headers.get(featureIndex);
+				featureString = headers.get(featureIndex) + " <= " + threshold;
 			}
 			
 			return "(" + featureString + "\n" + 
