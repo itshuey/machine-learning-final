@@ -45,7 +45,7 @@ public class ClassifierFactory {
 	 */
 	public Classifier getClassifier(){
 		if( classifierType == 0 ){
-			DecisionTreeClassifier dt = new DecisionTreeClassifier();
+			BinaryDecisionTreeClassifier dt = new BinaryDecisionTreeClassifier();
 			
 			if( setClassifierParameter ){
 				dt.setDepthLimit(classifierParameter);

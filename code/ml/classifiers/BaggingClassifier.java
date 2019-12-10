@@ -120,7 +120,7 @@ public class BaggingClassifier implements Classifier {
 					
 				} else if (classifierType == DECISION_TREE) {
 					
-					DecisionTreeClassifier c = new DecisionTreeClassifier();
+					BinaryDecisionTreeClassifier c = new BinaryDecisionTreeClassifier();
 					// tune hyperparameters if they exist
 					if (b.length() >= 2) c.setDepthLimit(Integer.valueOf(b.substring(1)));
 					classifiers[i] = c; i++;

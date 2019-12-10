@@ -10,7 +10,7 @@ import ml.data.Example;
 import ml.utils.HashMapCounter;
 
 /**
- * Decision tree classifier that supports real valued features.
+ * Binary decision tree classifier that supports real valued features.
  * 
  * The classifier handles real-valued features by splitting based on values greater than
  * and lower than a certain value.
@@ -23,8 +23,10 @@ public class BinaryDecisionTreeClassifier implements Classifier{
 	private HashMap<Integer,String> featureMap;
 	private Set<Integer> featureIndices;
 	private DecisionTreeNode decisionTree;
-	public int depthMax = Integer.MAX_VALUE;
-	private boolean isRealData = true;	// defaults to true
+	private int depthMax = Integer.MAX_VALUE;
+	
+	public static final double NEGATIVE_LABEL = -1.0;
+	public static final double POSITIVE_LABEL = 1.0;
 	
 	public void train(DataSet data) {
 		if( data.getData().size() == 0 ){
@@ -43,16 +45,6 @@ public class BinaryDecisionTreeClassifier implements Classifier{
 	 */
 	public void setDepthLimit(int depthMax){
 		this.depthMax = depthMax;
-	}
-	
-	/**
-	 * Set whether we are working with real values or categorical variables
-	 * (This controls how we split)
-	 * 
-	 * @param depthMax the max depth of the tree
-	 */
-	public void setRealData(boolean isRealData){
-		this.isRealData = isRealData;
 	}
 	
 	/**
@@ -150,20 +142,41 @@ public class BinaryDecisionTreeClassifier implements Classifier{
 	private double[] averageTrainingError(ArrayList<Example> data, int featureIndex){		
 		// sort the data
 		data.sort((o1, o2) -> Double.compare(o1.getFeature(featureIndex),o2.getFeature(featureIndex)));
-		double bestAccuracy = -1.0;
-		double bestThreshold = 0.0;
 		
-		for (int i = 0; i < data.size(); i++) {
-			double threshold = data.get(i).getFeature(featureIndex);
-			ArrayList<Example>[] splits = splitData(data, featureIndex, threshold);
+		int left_neg, left_pos, right_neg, right_pos;
+		left_neg = left_pos = right_neg = right_pos = 0;
+		
+		// Initialize first pass
+		if (data.get(0).getLabel() == NEGATIVE_LABEL) {
+			left_neg++;
+		} else left_pos++;
+		
+		for (int i=1; i<data.size(); i++) {
+			if (data.get(i).getLabel() == NEGATIVE_LABEL) {
+				right_neg++;
+			} else right_pos++;
+		}
+		
+		int leftCount = left_neg > left_pos ? left_neg : left_pos;
+		int rightCount = right_neg > right_pos ? right_neg : right_pos;
+		double bestAccuracy = (leftCount+rightCount)/(double)data.size();
+		double bestThreshold = data.get(0).getFeature(featureIndex);
+		
+		for (int i = 1; i < data.size(); i++) {
+			if (data.get(i).getLabel() == NEGATIVE_LABEL) {
+				left_neg++; right_neg--;
+			} else {
+				left_pos++; right_pos--;
+			}
 			
-			int leftCount = splits[0].size() > 0 ? getMajorityLabel(splits[0]).majorityCount : 0;
-			int rightCount = splits[1].size() > 0 ? getMajorityLabel(splits[1]).majorityCount : 0;
+			leftCount = left_neg > left_pos ? left_neg : left_pos;
+			rightCount = right_neg > right_pos ? right_neg : right_pos;
 			
 			double accuracy = (leftCount+rightCount)/(double)data.size();
+
 			if (accuracy > bestAccuracy) {
 				bestAccuracy = accuracy;
-				bestThreshold = threshold;
+				bestThreshold = data.get(i).getFeature(featureIndex);
 			}
 		}
 
@@ -208,21 +221,17 @@ public class BinaryDecisionTreeClassifier implements Classifier{
 	 * @return majority information from the data
 	 */
 	private DataMajority getMajorityLabel(ArrayList<Example> data){
-		HashMapCounter<Double> counter = new HashMapCounter<Double>();
 		
+		int negatives = 0;
+		int positives = 0;
+
 		for( Example d: data ){
-			counter.increment(d.getLabel());
+			if (d.getLabel() == NEGATIVE_LABEL) negatives++;
+			else positives++;
 		}
 		
-		double maxLabel = 0.0;
-		int maxCount = -1;
-		
-		for( Double key: counter.keySet() ){
-			if( counter.get(key) > maxCount ){
-				maxCount = counter.get(key);
-				maxLabel = key;
-			}
-		}
+		double maxLabel = negatives > positives ? NEGATIVE_LABEL : POSITIVE_LABEL;
+		int maxCount = negatives > positives ? negatives : positives;
 		
 		return new DataMajority(maxLabel, maxCount, ((double)maxCount)/data.size());
 	}
