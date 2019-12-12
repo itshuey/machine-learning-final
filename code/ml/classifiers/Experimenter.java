@@ -10,13 +10,15 @@ import ml.data.*;
 public class Experimenter {
 	
 	public static void main(String[] args) {
+//		testData();
 //		testBagger();
 //		testPerceptronBagging();
+//		testTreeBagging();
 //		tunePerceptron();
 //		tuneBaggedPerceptron();
 //		tuneDecisionTree();
-		tuneBaggedDecisionTree();
-//		testTreeBagging();
+//		tuneBaggedDecisionTree();
+		compareClassifiers();
 	}
 	
 	public static void testBagger() {
@@ -24,8 +26,16 @@ public class Experimenter {
 		bag.printClassifierConstructor();
 	}
 	
+	public static void testData() {
+		DataSet data = new DataSet("data/ionosphere.data", "ionosphere");
+		System.out.println(data.getData().size());
+		Example e1 = data.getData().get(0);
+		System.out.println(e1.toString());
+		
+	}
+	
 	public static void tunePerceptron() {
-		DataSet data = new DataSet("data/abalone.data");
+		DataSet data = new DataSet("data/abalone.data", "abalone");
 		
 		CrossValidationSet cvs = new CrossValidationSet(data, 10);
 		PerceptronClassifier c = new PerceptronClassifier();
@@ -45,7 +55,7 @@ public class Experimenter {
 	}
 	
 	public static void tuneBaggedPerceptron() {
-		DataSet data = new DataSet("data/abalone.data");
+		DataSet data = new DataSet("data/abalone.data", "abalone");
 		
 		CrossValidationSet cvs = new CrossValidationSet(data, 10);
 		BaggingClassifier bag = new BaggingClassifier();
@@ -67,7 +77,7 @@ public class Experimenter {
 	}
 	
 	public static void tuneDecisionTree() {
-		DataSet data = new DataSet("data/abalone.data");
+		DataSet data = new DataSet("data/abalone.data", "abalone");
 		
 		CrossValidationSet cvs = new CrossValidationSet(data, 10);
 		BinaryDecisionTreeClassifier c = new BinaryDecisionTreeClassifier();
@@ -87,7 +97,9 @@ public class Experimenter {
 	}
 	
 	public static void tuneBaggedDecisionTree() {
-		DataSet data = new DataSet("data/abalone.data");
+//		DataSet data = new DataSet("data/abalone.data", "abalone");
+//		DataSet data = new DataSet("data/ionosphere.data", "ionosphere");
+		DataSet data = new DataSet("data/cleveland.data", "cleveland");
 		
 		CrossValidationSet cvs = new CrossValidationSet(data, 10);
 		BaggingClassifier c = new BaggingClassifier();
@@ -95,7 +107,7 @@ public class Experimenter {
 		for (int n = 1; n <= 20; n++) {
 			c.setNumClassifiers(n);
 			
-			for (int d = 1; d <= 8; d++) {
+			for (int d = 1; d <= 15; d++) {
 				c.setClassifierConstructor(n + "t" + d);
 				
 				double accuracy = 0.0;
@@ -112,7 +124,8 @@ public class Experimenter {
 	}
 	
 	public static void testPerceptronBagging() {
-		DataSet data = new DataSet("data/abalone.data");
+//		DataSet data = new DataSet("data/abalone.data", "abalone");
+		DataSet data = new DataSet("data/ionosphere.data", "ionosphere");
 		
 		DataSetSplit splitData = data.split(0.8);
 		PerceptronClassifier c = new PerceptronClassifier();
@@ -133,21 +146,69 @@ public class Experimenter {
 	
 	
 	public static void testTreeBagging() {
-		DataSet data = new DataSet("data/abalone.data");
+//		DataSet data = new DataSet("data/abalone.data", "abalone");
+//		DataSet data = new DataSet("data/ionosphere.data", "ionosphere");
+		DataSet data = new DataSet("data/cleveland.data", "cleveland");
 		
 		DataSetSplit splitData = data.split(0.8);
 		BinaryDecisionTreeClassifier tree = new BinaryDecisionTreeClassifier();
-//		tree.setDepthLimit(3);
+		tree.setDepthLimit(1);
 		tree.train(splitData.getTrain());
 		System.out.println(getAccuracy(tree,splitData.getTest()));
-//		System.out.println(tree);
+		System.out.println(tree);
 		
 		BaggingClassifier bag = new BaggingClassifier(10);
-		bag.setClassifierConstructor("10t3");
+		bag.setClassifierConstructor("10t5");
 		bag.train(splitData.getTrain());
 		System.out.println(getAccuracy(bag,splitData.getTest()));
 		
 //		bag.printClassifiers();
+	}
+	
+	public static void compareClassifiers() {
+		
+		DataSet data = new DataSet("data/abalone.data", "abalone");
+		
+		CrossValidationSet cvs = new CrossValidationSet(data, 10);
+		
+		Classifier[] classifiers = new Classifier[2];
+		
+//		PerceptronClassifier p = new PerceptronClassifier();
+//		p.setIterations(3);
+//		classifiers[0] = p;
+//		
+//		BaggingClassifier bp = new BaggingClassifier();
+//		bp.setNumClassifiers(14);
+//		bp.setClassifierConstructor("14p3");
+//		classifiers[1] = bp;
+		
+		BinaryDecisionTreeClassifier tree1 = new BinaryDecisionTreeClassifier();
+		tree1.setDepthLimit(7);
+		classifiers[0] = tree1;
+		
+		BaggingClassifier bt1 = new BaggingClassifier();
+		bt1.setNumClassifiers(6);
+		bt1.setClassifierConstructor("6p7");
+		classifiers[1] = bt1;
+		
+//		BinaryDecisionTreeClassifier tree2 = new BinaryDecisionTreeClassifier();
+//		tree1.setDepthLimit(2);
+//		classifiers[4] = tree2;
+//		
+//		BaggingClassifier bt2 = new BaggingClassifier();
+//		bp.setNumClassifiers(6);
+//		bp.setClassifierConstructor("6p2");
+//		classifiers[5] = bt2;
+
+		for (Classifier c : classifiers) {
+			for (int i = 0; i < 10; i++) {
+				DataSetSplit splitData = cvs.getValidationSet(i);
+				c.train(splitData.getTrain());
+				System.out.println(getAccuracy(c,splitData.getTest()));
+			}
+			System.out.println();
+		}
+		
 	}
 	
 	

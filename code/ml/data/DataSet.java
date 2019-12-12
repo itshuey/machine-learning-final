@@ -35,42 +35,101 @@ public class DataSet {
 	 * 
 	 * @param filename the location of the file
 	 */
-	public DataSet(String filename){
+	public DataSet(String filename, String dataname){
 
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(filename));
 
-			String line;
-			while ((line = in.readLine()) != null) {
-				Example current = new Example();
-				String[] data = line.split(",");
+			if (dataname.equals("abalone")) {
+				String line;
+				while ((line = in.readLine()) != null) {
+					Example current = new Example();
+					String[] data = line.split(",");
+					
+					double label = Double.parseDouble(data[data.length-1]) < 9 ? -1.0 : 1.0;
+					current.setLabel(label);
+					
+					for (int i=data.length-2; i > 0; i--) 
+						current.setFeature(i, Double.parseDouble(data[i]));
+	
+					double sex;
+					if (data[0].equals("M")) 		sex = 1.0;
+					else if (data[0].equals("F")) 	sex = -1.0;
+					else 							sex = 0.0;
+					
+					current.setFeature(0, sex);
+					addData(current);
+				}
 				
-				double label = Double.parseDouble(data[data.length-1]) < 9 ? -1.0 : 1.0;
-				current.setLabel(label);
+				HashMap<Integer, String> features = new HashMap<>();
+				features.put(0, "Sex");
+				features.put(1, "Length");
+				features.put(2, "Diameter");
+				features.put(3, "Height");
+				features.put(4, "Whole weight");
+				features.put(5, "Shucked weight");
+				features.put(6, "Viscera weight");
+				features.put(7, "Shell weight");
 				
-				for (int i=data.length-2; i > 0; i--) 
-					current.setFeature(i, Double.parseDouble(data[i]));
+				featureMap = features;
+			} 
+			
+			else if (dataname.equals("ionosphere")){
+				String line;
+				while ((line = in.readLine()) != null) {
+					Example current = new Example();
+					String[] data = line.split(",");
+					
+					double label = data[data.length-1].equals("g")  ? 1.0 : -1.0;
+					current.setLabel(label);
+					
+					for (int i=data.length-2; i >= 0; i--) 
+						current.setFeature(i, Double.parseDouble(data[i]));
 
-				double sex;
-				if (data[0].equals("M")) 		sex = 1.0;
-				else if (data[0].equals("F")) 	sex = -1.0;
-				else 							sex = 0.0;
+					addData(current);
+				}
 				
-				current.setFeature(0, sex);
-				addData(current);
+				HashMap<Integer, String> features = new HashMap<>();
+				for (int i = 0; i <= 33; i++) {
+					features.put(i, "Feature " + i);
+				}	
+				featureMap = features;
+			} 
+			
+			else if (dataname.equals("cleveland")){
+				String line;
+				while ((line = in.readLine()) != null) {
+					Example current = new Example();
+					String[] data = line.split(",");
+					
+					double label = data[data.length-1].equals("0")  ? 1.0 : -1.0;
+					current.setLabel(label);
+					
+					for (int i=data.length-2; i >= 0; i--) {
+						double entry = data[i].equals("?") ? 0.0 : Double.parseDouble(data[i]);
+						current.setFeature(i, entry);
+					}
+
+					addData(current);
+				}
+				
+				HashMap<Integer, String> features = new HashMap<>();
+				features.put(0, "age");
+				features.put(1, "sex");
+				features.put(2, "cp");
+				features.put(3, "testbps");
+				features.put(4, "chol");
+				features.put(5, "fbs");
+				features.put(6, "restecg");
+				features.put(7, "thalach");
+				features.put(8, "exang");
+				features.put(9, "oldpeak");
+				features.put(10, "slope");
+				features.put(11, "ca");
+				features.put(12, "thal");
+	
+				featureMap = features;
 			}
-			
-			HashMap<Integer, String> features = new HashMap<>();
-			features.put(0, "Sex");
-			features.put(1, "Length");
-			features.put(2, "Diameter");
-			features.put(3, "Height");
-			features.put(4, "Whole weight");
-			features.put(5, "Shucked weight");
-			features.put(6, "Viscera weight");
-			features.put(7, "Shell weight");
-			
-			featureMap = features;
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
